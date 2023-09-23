@@ -10,7 +10,7 @@ func NewClient() *Client {
 	client := &Client{
 		httpClient: http.DefaultClient,
 	}
-	return &Client{}
+	return client
 }
 
 func main() {
