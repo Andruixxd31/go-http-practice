@@ -1,0 +1,18 @@
+package client
+
+import "net/http"
+
+type Client struct {
+	httpClient *http.Client
+}
+
+func NewClient() *Client {
+	client := &Client{
+		httpClient: http.DefaultClient,
+	}
+	return &Client{}
+}
+
+func main() {
+
+}
