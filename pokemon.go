@@ -11,7 +11,7 @@ func (c *Client) GetPokemonByName(ctx context.Context, name string) (Pokemon, er
 	req, err := http.NewRequestWithContext(
 		ctx,
 		http.MethodGet,
-		"https://pokeapi.co/api/v2/pokemon/"+name,
+		c.apiURL+"/api/v2/pokemon/"+name,
 		nil,
 	)
 	if err != nil {
