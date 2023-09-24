@@ -2,7 +2,9 @@ package client
 
 import (
 	"context"
+	"fmt"
 	"net/http"
+	"net/http/httptest"
 	"testing"
 	"time"
 
@@ -39,6 +41,40 @@ func TestClientCanHitAPI(t *testing.T) {
 		)
 		assert.Equal(t, "test-url", myClient.apiURL)
 		assert.Equal(t, 1*time.Second, myClient.httpClient.Timeout)
+	})
+
+	t.Run("happy path - able to hit locally run server", func(t *testing.T) {
+		testServer := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				fmt.Fprintf(w, `{"name": "pikachu", "height": 10}`)
+			}),
+		)
+		defer testServer.Close()
+
+		myClient := NewClient(
+			withAPIURL(testServer.URL),
+		)
+
+		pokemon, err := myClient.GetPokemonByName(context.Background(), "pikachu")
+		assert.NoError(t, err)
+		assert.Equal(t, 10, pokemon.Height)
+	})
+
+	t.Run("sad path - able to handle 500 status from API", func(t *testing.T) {
+		testServer := httptest.NewServer(
+			http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusInternalServerError)
+			}),
+		)
+		defer testServer.Close()
+
+		myClient := NewClient(
+			withAPIURL(testServer.URL),
+		)
+
+		pokemon, err := myClient.GetPokemonByName(context.Background(), "pikachu")
+		assert.Error(t, err)
+		assert.Equal(t, 0, pokemon.Height)
 	})
 
 }
